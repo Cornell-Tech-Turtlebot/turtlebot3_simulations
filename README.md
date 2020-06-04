@@ -1,6 +1,9 @@
 # turtlebot3-simulations
 
-This code implements the left-wall following algorithm to solve a maze. The maze used for this example can be found on https://github.com/Cornell-Tech-Turtlebot/maze-simulation. The code was modified from the original at https://github.com/ROBOTIS-GIT/turtlebot3_simulations. 
+This code implements the left-wall following algorithm to solve a maze. 
+
+
+The maze used for this example can be found on https://github.com/Cornell-Tech-Turtlebot/maze-simulation. The code was modified from the original at https://github.com/ROBOTIS-GIT/turtlebot3_simulations. 
 
 ## Set-Up
 
