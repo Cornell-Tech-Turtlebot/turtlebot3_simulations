@@ -14,7 +14,7 @@ Follow the instructions on https://github.com/Cornell-Tech-Turtlebot/rosinstalls
 1. Run  ```export TURTLEBOT3_MODEL=waffle_pi```.
 
 2. Once Gazebo has launched after following the instructions on https://github.com/Cornell-Tech-Turtlebot/maze-simulation 
-run the command: 
+open a second terminal and run the command: 
 
 ```roslaunch turtlebot3_gazebo turtlebot3_simulation.launch```
 
