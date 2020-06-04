@@ -16,9 +16,9 @@ Follow the instructions on https://github.com/Cornell-Tech-Turtlebot/rosinstalls
 2. Once Gazebo has launched after following the instructions on https://github.com/Cornell-Tech-Turtlebot/maze-simulation 
 open a second terminal and run the command: 
 
-```roslaunch turtlebot3_gazebo turtlebot3_simulation.launch```
+  ```roslaunch turtlebot3_gazebo turtlebot3_simulation.launch```
 
-The robot will start following the left-wall of the maze and solve it.
+  The robot will start following the left-wall of the maze and solve it.
 
 # TurtleBot3
 <img src="https://github.com/ROBOTIS-GIT/emanual/blob/master/assets/images/platform/turtlebot3/logo_turtlebot3.png" width="300">
