@@ -41,9 +41,9 @@ bool Turtlebot3Drive::init()
   std::string cmd_vel_topic_name = nh_.param<std::string>("cmd_vel_topic_name", "");
 
   // initialize variables
-  //escape_range_       = 30.0 * DEG2RAD;
-  check_forward_dist_ = 1.0;
-  check_side_dist_    = 1.0;
+  escape_range_       = 30.0 * DEG2RAD;
+  check_forward_dist_ = 0.7;
+  check_side_dist_    = 0.6;
 
   tb3_pose_ = 0.0;
   prev_tb3_pose_ = 0.0;
@@ -66,19 +66,12 @@ void Turtlebot3Drive::odomMsgCallBack(const nav_msgs::Odometry::ConstPtr &msg)
 	tb3_pose_ = atan2(siny, cosy);
 }
 
-bool robot_crashed = false;
-
 void Turtlebot3Drive::laserScanMsgCallBack(const sensor_msgs::LaserScan::ConstPtr &msg)
 {
   uint16_t scan_angle[3] = {0, 30, 330};
-  int count = 0;
 
   for (int num = 0; num < 3; num++)
   {
-  	if (std::isnan(msg->ranges[num])) {
-            count++;
-    }
-
     if (std::isinf(msg->ranges.at(scan_angle[num])))
     {
       scan_data_[num] = msg->range_max;
@@ -88,16 +81,6 @@ void Turtlebot3Drive::laserScanMsgCallBack(const sensor_msgs::LaserScan::ConstPt
       scan_data_[num] = msg->ranges.at(scan_angle[num]);
     }
   }
-
-    // Check if the robot has crashed into a wall
-
-    if ((3 * 0.9) < count || scan_data_[1] < 0.25) {
-        robot_crashed = true;
-    }
-    else {
-        robot_crashed = false;
-    }
-
 }
 
 void Turtlebot3Drive::updatecommandVelocity(double linear, double angular)
@@ -111,85 +94,65 @@ void Turtlebot3Drive::updatecommandVelocity(double linear, double angular)
 }
 
 /*******************************************************************************
-* Control Loop function - Implements the Left Wall Following ALgorithm
+* Control Loop function
 *******************************************************************************/
-
 bool Turtlebot3Drive::controlLoop()
 {
-	static uint8_t turtlebot3_state_num = 0;
+  static uint8_t turtlebot3_state_num = 0;
 
-	    
-	  switch(turtlebot3_state_num)
-	  {
+  switch(turtlebot3_state_num)
+  {
+    case GET_TB3_DIRECTION:
+      if (scan_data_[CENTER] > check_forward_dist_)
+      {
+        if (scan_data_[LEFT] < check_side_dist_)
+        {
+          prev_tb3_pose_ = tb3_pose_;
+          turtlebot3_state_num = TB3_RIGHT_TURN;
+        }
+        else if (scan_data_[RIGHT] < check_side_dist_)
+        {
+          prev_tb3_pose_ = tb3_pose_;
+          turtlebot3_state_num = TB3_LEFT_TURN;
+        }
+        else
+        {
+          turtlebot3_state_num = TB3_DRIVE_FORWARD;
+        }
+      }
 
-	  	// general case
-	    case GET_TB3_DIRECTION:
+      if (scan_data_[CENTER] < check_forward_dist_)
+      {
+        prev_tb3_pose_ = tb3_pose_;
+        turtlebot3_state_num = TB3_RIGHT_TURN;
+      }
+      break;
 
-	    	if(!robot_crashed){ // if the robot hasn't crashed evaluate the situation
+    case TB3_DRIVE_FORWARD:
+      updatecommandVelocity(LINEAR_VELOCITY, 0.0);
+      turtlebot3_state_num = GET_TB3_DIRECTION;
+      break;
 
-		        if (scan_data_[LEFT] > check_side_dist_) // if no left wall move left
-		        {
-		          prev_tb3_pose_ = tb3_pose_;
-		          turtlebot3_state_num = TB3_LEFT_TURN;
-		        }
-		        else if ((scan_data_[CENTER] > check_forward_dist_)) // else if no front wall move forward
-		      	{	    
-		      		prev_tb3_pose_ = tb3_pose_;
-		      		turtlebot3_state_num = TB3_DRIVE_FORWARD;
-		      	}
-				else if ((scan_data_[RIGHT] > check_side_dist_)) // else if no right wall move right
-				{	 
-					prev_tb3_pose_ = tb3_pose_;
-		        	turtlebot3_state_num = TB3_RIGHT_TURN;	
-				}
+    case TB3_RIGHT_TURN:
+      if (fabs(prev_tb3_pose_ - tb3_pose_) >= escape_range_)
+        turtlebot3_state_num = GET_TB3_DIRECTION;
+      else
+        updatecommandVelocity(0.0, -1 * ANGULAR_VELOCITY);
+      break;
 
-		        else // in any other situation rotate right to find a new direction 
-		        {
-		            prev_tb3_pose_ = tb3_pose_;
-		        	turtlebot3_state_num = TB3_TURN_AROUND;	
-		        }
-		    } else // if the robot has crashed rotate right to find a new direction
-		    {
-		    	prev_tb3_pose_ = tb3_pose_;
-		        turtlebot3_state_num = TB3_TURN_AROUND;	
+    case TB3_LEFT_TURN:
+      if (fabs(prev_tb3_pose_ - tb3_pose_) >= escape_range_)
+        turtlebot3_state_num = GET_TB3_DIRECTION;
+      else
+        updatecommandVelocity(0.0, ANGULAR_VELOCITY);
+      break;
 
-		    }
+    default:
+      turtlebot3_state_num = GET_TB3_DIRECTION;
+      break;
+  }
 
-		    break; 
-	     
-	    // moving forward, right, left, or turning around for the case where the robot crashed
-	        
-	    case TB3_DRIVE_FORWARD:
-
-	    	updatecommandVelocity(LINEAR_VELOCITY, 0.0);
-	     	turtlebot3_state_num = GET_TB3_DIRECTION;
-	     	break;
-
-	    case TB3_RIGHT_TURN:
-		      if (fabs(prev_tb3_pose_ - tb3_pose_) >= escape_range_)
-		        turtlebot3_state_num = GET_TB3_DIRECTION;
-		      else
-		      	updatecommandVelocity(LINEAR_VELOCITY, -1* ANGULAR_VELOCITY);
-	      break;
-
-	    case TB3_LEFT_TURN:
-	      if (fabs(prev_tb3_pose_ - tb3_pose_) >= escape_range_)
-	        turtlebot3_state_num = GET_TB3_DIRECTION;
-	      else
-	        updatecommandVelocity(LINEAR_VELOCITY, ANGULAR_VELOCITY);
-	      break;
-
-	  	case TB3_TURN_AROUND:
-	  		updatecommandVelocity(0.0, -1* ANGULAR_VELOCITY);
-	      	turtlebot3_state_num = GET_TB3_DIRECTION;
-	      break;
-
-	    default:
-	      turtlebot3_state_num = GET_TB3_DIRECTION;
-	      break;
-	  }
-
-  return true; 
+  return true;
 }
 
 /*******************************************************************************
