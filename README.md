@@ -19,6 +19,10 @@ open a second terminal and run the command:
   ```roslaunch turtlebot3_gazebo turtlebot3_simulation.launch```
 
   The robot will start following the left-wall of the maze and solve it.
+  
+## Demo
+
+A demo video together with the resulting SLAM map can be found in the Demo folder.
 
 # TurtleBot3
 <img src="https://github.com/ROBOTIS-GIT/emanual/blob/master/assets/images/platform/turtlebot3/logo_turtlebot3.png" width="300">
