@@ -32,8 +32,8 @@
 #define LEFT   1
 #define RIGHT  2
 
-#define LINEAR_VELOCITY  0.55
-#define ANGULAR_VELOCITY 1.6
+#define LINEAR_VELOCITY  0.54
+#define ANGULAR_VELOCITY 1.51
 
 #define GET_TB3_DIRECTION 0
 #define TB3_DRIVE_FORWARD 1
