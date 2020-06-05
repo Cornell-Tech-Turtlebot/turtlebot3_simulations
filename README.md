@@ -1,29 +1,3 @@
-# turtlebot3-simulations
-
-This code implements the left-wall following algorithm to solve a maze. 
-
-
-The maze used for this example can be found on https://github.com/Cornell-Tech-Turtlebot/maze-simulation. The code was modified from the original at https://github.com/ROBOTIS-GIT/turtlebot3_simulations. 
-
-## Set-Up
-
-Follow the instructions on https://github.com/Cornell-Tech-Turtlebot/rosinstalls to run the eva-maze.rosinstall file.
-
-## Usage
-
-1. Run  ```export TURTLEBOT3_MODEL=waffle_pi```.
-
-2. Once Gazebo has launched after following the instructions on https://github.com/Cornell-Tech-Turtlebot/maze-simulation 
-open a second terminal and run the command: 
-
-  ```roslaunch turtlebot3_gazebo turtlebot3_simulation.launch```
-
-  The robot will start following the left-wall of the maze and solve it.
-  
-## Demo
-
-A demo video together with the resulting SLAM map can be found in the Demo folder.
-
 # TurtleBot3
 <img src="https://github.com/ROBOTIS-GIT/emanual/blob/master/assets/images/platform/turtlebot3/logo_turtlebot3.png" width="300">
 
